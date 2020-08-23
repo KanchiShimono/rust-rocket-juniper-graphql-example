@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  roach1:
+    image: cockroachdb/cockroach:v20.1.4
+    command: ['start-single-node', '--insecure', '--logtostderr']
+    ports:
+      - 26257:26257
+      - 8080:8080

@@ -1,0 +1,2 @@
+[global.databases]
+postgres_db = { url = "postgresql://maxroach@localhost:26257/review" }

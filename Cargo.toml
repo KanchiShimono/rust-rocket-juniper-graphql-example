@@ -13,7 +13,7 @@ rocket = { version = "0.4.5" }
 rocket_contrib = { version = "0.4.5", default-features = false, features = ["diesel_postgres_pool"] }
 serde_json = { version = "1.0" }
 diesel = { version = "1.4.5", features=["postgres", "uuidv07"] }
-uuid = { version = "0.8.1", features = ["serde", "v4"] }
+uuid = { version = "0.7", features = ["serde", "v4"] }
 dotenv = "0.15.0"
 log = "0.4.11"
 env_logger = "0.7.1"

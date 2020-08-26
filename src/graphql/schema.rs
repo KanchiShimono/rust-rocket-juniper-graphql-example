@@ -15,6 +15,27 @@ pub struct Post {
     text: String,
 }
 
+#[derive(GraphQLInputObject)]
+pub struct CreatePersonInput {
+    pub name: String,
+}
+
+#[derive(GraphQLInputObject)]
+pub struct CreatePostInput {
+    pub person_id: Uuid,
+    pub text: String,
+}
+
+impl Into<Person> for models::Person {
+    fn into(self) -> Person {
+        Person {
+            id: self.id,
+            name: self.name,
+            posts: vec![],
+        }
+    }
+}
+
 impl Into<Person> for models::PersonWithPost {
     fn into(self) -> Person {
         Person {

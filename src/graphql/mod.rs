@@ -1,6 +1,7 @@
 use crate::db::{models, Db};
-use juniper::FieldResult;
+use juniper::{FieldError, FieldResult};
 use rocket::request::{FromRequest, Outcome, Request};
+use schema::{CreatePersonInput, CreatePostInput};
 
 pub mod schema;
 
@@ -25,7 +26,8 @@ pub struct Mutation;
 #[juniper::object(Context = Context)]
 impl Query {
     fn persons(context: &Context) -> FieldResult<Vec<schema::Person>> {
-        let result = models::PersonWithPost::find_all(&context.conn)?
+        let result = models::PersonWithPost::find_all(&context.conn)
+            .map_err(|e| FieldError::from(e))?
             .into_iter()
             .map(Into::into)
             .collect();
@@ -34,7 +36,8 @@ impl Query {
     }
 
     fn posts(context: &Context) -> FieldResult<Vec<schema::Post>> {
-        let result = models::Post::find_all(&context.conn)?
+        let result = models::Post::find_all(&context.conn)
+            .map_err(|e| FieldError::from(e))?
             .into_iter()
             .map(Into::into)
             .collect();
@@ -44,4 +47,16 @@ impl Query {
 }
 
 #[juniper::object(Context = Context)]
-impl Mutation {}
+impl Mutation {
+    fn create_person(context: &Context, input: CreatePersonInput) -> FieldResult<schema::Person> {
+        models::Person::save(&context.conn, input)
+            .map(Into::into)
+            .map_err(|e| FieldError::from(e))
+    }
+
+    fn create_post(context: &Context, input: CreatePostInput) -> FieldResult<schema::Post> {
+        models::Post::save(&context.conn, input)
+            .map(Into::into)
+            .map_err(|e| FieldError::from(e))
+    }
+}

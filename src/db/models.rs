@@ -1,7 +1,7 @@
 use crate::db::schema::{person, person::dsl::*, post, post::dsl::*};
 use crate::graphql::schema::{CreatePersonInput, CreatePostInput};
 use chrono::{NaiveDateTime, Utc};
-use diesel::prelude::*;
+use diesel::{prelude::*, result::Error};
 use uuid::Uuid;
 
 #[derive(Debug, PartialEq, Identifiable, Queryable, Insertable)]
@@ -24,7 +24,7 @@ pub struct Post {
     pub update_at: NaiveDateTime,
 }
 
-pub struct PersonWithPost {
+pub struct PersonWithPosts {
     pub id: Uuid,
     pub name: String,
     pub posts: Vec<Post>,
@@ -33,14 +33,18 @@ pub struct PersonWithPost {
 }
 
 impl Person {
-    pub fn find_all(conn: &diesel::PgConnection) -> Result<Vec<Person>, diesel::result::Error> {
-        person.order(person::name).load::<Person>(conn)
+    pub fn find_all(conn: &diesel::PgConnection) -> Result<Vec<Person>, Error> {
+        person.order(person::update_at.desc()).load::<Person>(conn)
+    }
+
+    pub fn find_by_id(conn: &diesel::PgConnection, pid: Uuid) -> Result<Person, Error> {
+        person.find(pid).first(conn)
     }
 
     pub fn save(
         conn: &diesel::PgConnection,
         new_person: CreatePersonInput,
-    ) -> Result<Person, diesel::result::Error> {
+    ) -> Result<Person, Error> {
         let now = Utc::now().naive_utc();
 
         let new_person = Person {
@@ -57,14 +61,21 @@ impl Person {
 }
 
 impl Post {
-    pub fn find_all(conn: &diesel::PgConnection) -> Result<Vec<Post>, diesel::result::Error> {
-        post.order(post::id).load::<Post>(conn)
+    pub fn find_all(conn: &diesel::PgConnection) -> Result<Vec<Post>, Error> {
+        post.order(post::update_at.desc()).load::<Post>(conn)
     }
 
-    pub fn save(
-        conn: &diesel::PgConnection,
-        new_post: CreatePostInput,
-    ) -> Result<Post, diesel::result::Error> {
+    pub fn find_by_id(conn: &diesel::PgConnection, pid: Uuid) -> Result<Post, Error> {
+        post.find(pid).first(conn)
+    }
+
+    pub fn find_by_person_id(conn: &diesel::PgConnection, pid: Uuid) -> Result<Vec<Post>, Error> {
+        post.filter(person_id.eq(pid))
+            .order(post::update_at.desc())
+            .get_results(conn)
+    }
+
+    pub fn save(conn: &diesel::PgConnection, new_post: CreatePostInput) -> Result<Post, Error> {
         let now = Utc::now().naive_utc();
 
         let new_post = Post {
@@ -79,13 +90,11 @@ impl Post {
     }
 }
 
-impl PersonWithPost {
-    pub fn find_all(
-        conn: &diesel::PgConnection,
-    ) -> Result<Vec<PersonWithPost>, diesel::result::Error> {
+impl PersonWithPosts {
+    pub fn find_all(conn: &diesel::PgConnection) -> Result<Vec<PersonWithPosts>, Error> {
         let persons = Person::find_all(conn)?;
         let posts: Vec<Vec<Post>> = Post::belonging_to(&persons)
-            .order(post::id)
+            .order(post::update_at.desc())
             .load::<Post>(conn)?
             .grouped_by(&persons);
 
@@ -93,11 +102,20 @@ impl PersonWithPost {
 
         Ok(results)
     }
+
+    pub fn find_by_id(conn: &diesel::PgConnection, pid: Uuid) -> Result<PersonWithPosts, Error> {
+        let psn: Person = person.find(pid).first(conn)?;
+        let posts: Vec<Post> = Post::belonging_to(&psn)
+            .order(post::update_at.desc())
+            .load::<Post>(conn)?;
+
+        Ok((psn, posts).into())
+    }
 }
 
-impl Into<PersonWithPost> for (Person, Vec<Post>) {
-    fn into(self) -> PersonWithPost {
-        PersonWithPost {
+impl Into<PersonWithPosts> for (Person, Vec<Post>) {
+    fn into(self) -> PersonWithPosts {
+        PersonWithPosts {
             id: self.0.id,
             name: self.0.name,
             posts: self.1,

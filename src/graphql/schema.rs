@@ -6,7 +6,6 @@ use uuid::Uuid;
 pub struct Person {
     id: Uuid,
     name: String,
-    posts: Vec<Post>,
     create_at: NaiveDateTime,
     update_at: NaiveDateTime,
 }
@@ -16,6 +15,15 @@ pub struct Post {
     id: Uuid,
     person_id: Uuid,
     text: String,
+    create_at: NaiveDateTime,
+    update_at: NaiveDateTime,
+}
+
+#[derive(GraphQLObject)]
+pub struct PersonWithPosts {
+    id: Uuid,
+    name: String,
+    posts: Vec<Post>,
     create_at: NaiveDateTime,
     update_at: NaiveDateTime,
 }
@@ -36,16 +44,15 @@ impl Into<Person> for models::Person {
         Person {
             id: self.id,
             name: self.name,
-            posts: vec![],
             create_at: self.create_at,
             update_at: self.update_at,
         }
     }
 }
 
-impl Into<Person> for models::PersonWithPost {
-    fn into(self) -> Person {
-        Person {
+impl Into<PersonWithPosts> for models::PersonWithPosts {
+    fn into(self) -> PersonWithPosts {
+        PersonWithPosts {
             id: self.id,
             name: self.name,
             posts: self.posts.into_iter().map(Into::into).collect(),

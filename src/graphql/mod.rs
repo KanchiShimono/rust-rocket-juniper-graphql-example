@@ -93,8 +93,20 @@ impl Mutation {
             .map_err(|e| FieldError::from(e))
     }
 
+    fn delete_person(context: &Context, id: Uuid) -> FieldResult<schema::Person> {
+        models::Person::delete(&context.conn, id)
+            .map(Into::into)
+            .map_err(|e| FieldError::from(e))
+    }
+
     fn create_post(context: &Context, input: CreatePostInput) -> FieldResult<schema::Post> {
         models::Post::save(&context.conn, input)
+            .map(Into::into)
+            .map_err(|e| FieldError::from(e))
+    }
+
+    fn delete_post(context: &Context, id: Uuid) -> FieldResult<schema::Post> {
+        models::Post::delete(&context.conn, id)
             .map(Into::into)
             .map_err(|e| FieldError::from(e))
     }

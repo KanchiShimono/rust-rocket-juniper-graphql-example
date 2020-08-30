@@ -58,6 +58,10 @@ impl Person {
             .values(&new_person)
             .get_result(conn)
     }
+
+    pub fn delete(conn: &diesel::PgConnection, pid: Uuid) -> Result<Person, Error> {
+        diesel::delete(person.filter(person::id.eq(pid))).get_result(conn)
+    }
 }
 
 impl Post {
@@ -87,6 +91,10 @@ impl Post {
         };
 
         diesel::insert_into(post).values(&new_post).get_result(conn)
+    }
+
+    pub fn delete(conn: &diesel::PgConnection, pid: Uuid) -> Result<Post, Error> {
+        diesel::delete(post.filter(post::id.eq(pid))).get_result(conn)
     }
 }
 

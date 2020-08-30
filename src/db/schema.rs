@@ -2,6 +2,8 @@ table! {
     person (id) {
         id -> Uuid,
         name -> Varchar,
+        create_at -> Timestamp,
+        update_at -> Timestamp,
     }
 }
 
@@ -10,6 +12,8 @@ table! {
         id -> Uuid,
         person_id -> Uuid,
         text -> Varchar,
+        create_at -> Timestamp,
+        update_at -> Timestamp,
     }
 }
 

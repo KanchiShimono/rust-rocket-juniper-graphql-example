@@ -1,4 +1,5 @@
 pub mod models;
+pub mod repository;
 pub mod schema;
 
 #[database("postgres_db")]

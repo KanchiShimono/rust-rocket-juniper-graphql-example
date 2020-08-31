@@ -1,6 +1,5 @@
 use crate::db::schema::{person, person::dsl::*, post, post::dsl::*};
-use crate::graphql::schema::{CreatePersonInput, CreatePostInput};
-use chrono::{NaiveDateTime, Utc};
+use chrono::NaiveDateTime;
 use diesel::{prelude::*, result::Error};
 use uuid::Uuid;
 
@@ -41,19 +40,7 @@ impl Person {
         person.find(pid).first(conn)
     }
 
-    pub fn save(
-        conn: &diesel::PgConnection,
-        new_person: CreatePersonInput,
-    ) -> Result<Person, Error> {
-        let now = Utc::now().naive_utc();
-
-        let new_person = Person {
-            id: Uuid::new_v4(),
-            name: new_person.name,
-            create_at: now,
-            update_at: now,
-        };
-
+    pub fn save(conn: &diesel::PgConnection, new_person: Person) -> Result<Person, Error> {
         diesel::insert_into(person)
             .values(&new_person)
             .get_result(conn)
@@ -79,17 +66,7 @@ impl Post {
             .get_results(conn)
     }
 
-    pub fn save(conn: &diesel::PgConnection, new_post: CreatePostInput) -> Result<Post, Error> {
-        let now = Utc::now().naive_utc();
-
-        let new_post = Post {
-            id: Uuid::new_v4(),
-            person_id: new_post.person_id,
-            text: new_post.text,
-            create_at: now,
-            update_at: now,
-        };
-
+    pub fn save(conn: &diesel::PgConnection, new_post: Post) -> Result<Post, Error> {
         diesel::insert_into(post).values(&new_post).get_result(conn)
     }
 

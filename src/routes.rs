@@ -3,7 +3,10 @@ use rocket::response::content;
 use rocket::State;
 use rocket::{get, post};
 
-use crate::graphql::{Context, Mutation, Query};
+use crate::graphql::{
+    context::Context,
+    resolver::{Mutation, Query},
+};
 
 pub type Schema = RootNode<'static, Query, Mutation>;
 

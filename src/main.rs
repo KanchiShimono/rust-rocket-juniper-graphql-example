@@ -14,7 +14,7 @@ pub mod graphql;
 pub mod routes;
 
 use db::Db;
-use graphql::{Mutation, Query};
+use graphql::resolver::{Mutation, Query};
 use routes::Schema;
 
 fn main() {

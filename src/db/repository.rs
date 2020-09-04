@@ -1,5 +1,7 @@
-use super::models::{Person, PersonWithPosts, Post};
-use crate::db::{models, Db};
+use crate::db::{
+    models::{Person, PersonWithPosts, Post},
+    Db,
+};
 use crate::graphql::schema::{CreatePersonInput, CreatePostInput};
 use chrono::Utc;
 use diesel::result::Error;
@@ -41,7 +43,7 @@ impl PersonRepository for PgPersonRepository {
     fn save(&self, input: CreatePersonInput) -> Result<Person, Error> {
         let now = Utc::now().naive_utc();
 
-        let new_person = models::Person {
+        let new_person = Person {
             id: Uuid::new_v4(),
             name: input.name,
             create_at: now,
